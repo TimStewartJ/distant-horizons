@@ -22,7 +22,30 @@ public class FabricMixinPlugin extends AbstractDhMixinPlugin implements IMixinCo
 	
 	@Override
 	public boolean shouldApplyMixin(String targetClassName, String mixinClassName)
-	{ return this.shouldApplyDhMixin(targetClassName, mixinClassName); }
+	{
+		if (mixinClassName.contains("NativeChunkReadiness"))
+		{
+			#if MC_VER != MC_26_2_0
+			return false;
+			#endif
+		}
+		if (mixinClassName.contains(".mods."))
+		{
+			String cleanedMixinName = mixinClassName
+				// What these 2 regex's do is get the mod name that we are checking out of the mixinClassName
+				// Eg. "com.seibel.distanthorizons.mixins.mods.sodium.MixinSodiumChunkRenderer" turns into "sodium"
+				.replaceAll("^.*mods.", "") // Replaces everything before the mods
+				.replaceAll("\\..*$", ""); // Replaces everything after the mod name
+			
+			// If the mixin wants to go into a mod then we check if that mod is loaded or not
+			if (!FabricLoader.getInstance().isModLoaded(cleanedMixinName))
+			{
+				return false;
+			}
+		}
+		
+		return this.shouldApplyDhMixin(targetClassName, mixinClassName);
+	}
 	
 	
 	@Override
