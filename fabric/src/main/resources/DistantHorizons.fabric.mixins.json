@@ -26,7 +26,12 @@
     "client.MixinOptionsScreen",
     "client.MixinSharedConstants",
     "client.MixinProjectionMatrixBuffer",
-    "client.MixinMain"
+    "client.MixinMain",
+    "mods.sodium.MixinSodiumRenderSectionNativeChunkReadiness",
+    "mods.sodium.MixinSodiumRenderSectionManagerNativeChunkReadiness",
+    "mods.iris.MixinIrisTransformPatcherNativeChunkReadiness",
+    "mods.iris.MixinIrisLodRenderProgramNativeChunkReadiness",
+    "mods.iris.MixinIrisRenderingPipelineNativeChunkReadiness"
   ],
   "server": [],
   "injectors": {
