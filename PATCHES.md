@@ -71,3 +71,7 @@ $env:JAVA_HOME = '<JDK 25>'
 3. In wrapper: rebase the same way, then point `coreSubProjects` at the rebased core and bump the version.
 4. Build, run `core:test`, compare the jar against the previous release, smoke-launch with Tellus and Tellus Expeditions.
 5. Tag both repositories with the new `…-tellus-fork.N` version.
+
+Drift check 2026-08-31 (`git apply --check --3way` of every patch onto official `main`, wrapper `06813e95` /
+core `b7941876`, version `3.2.1-b-dev`, API 7.1.0): all nine core patches apply cleanly; in the wrapper only the
+`mod_version` lines and the submodule pointer conflict, as expected.
