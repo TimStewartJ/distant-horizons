@@ -1,0 +1,110 @@
+name: Release
+
+# Builds the Minecraft 26.2 Fabric and NeoForge jars from a version tag and publishes them as a
+# GitHub Release. Trigger: push a tag equal to mod_version (e.g. 3.2.0-b-tellus-fork.2), or
+# dispatch manually for an existing tag. The same tag must exist on the core submodule commit.
+
+on:
+  push:
+    tags:
+      - '*-tellus-fork.*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing tag to release (e.g. 3.2.0-b-tellus-fork.2)
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ inputs.tag || github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      TAG: ${{ inputs.tag || github.ref_name }}
+
+    steps:
+      - name: Check out the tag and core submodule
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          ref: ${{ inputs.tag || github.ref_name }}
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Verify the tag matches mod_version and the core submodule
+        run: |
+          set -euo pipefail
+          VERSION=$(sed -n 's/^mod_version=//p' gradle.properties | tr -d '\r')
+          if [ "$VERSION" != "$TAG" ]; then
+            echo "::error::tag $TAG does not match gradle.properties mod_version=$VERSION"
+            exit 1
+          fi
+          git -C coreSubProjects fetch --tags --quiet origin
+          if ! git -C coreSubProjects tag --points-at HEAD | grep -qx "$TAG"; then
+            echo "::error::core submodule commit $(git -C coreSubProjects rev-parse --short HEAD) is not tagged $TAG in distant-horizons-core"
+            exit 1
+          fi
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+          echo "CORE_SHA=$(git -C coreSubProjects rev-parse HEAD)" >> "$GITHUB_ENV"
+
+      - name: Set up Java 25
+        uses: actions/setup-java@0f481fcb613427c0f801b606911222b5b6f3083a # v5
+        with:
+          distribution: temurin
+          java-version: 25
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@0723195856401067f7a2779048b490ace7a47d7c # v5
+
+      - name: Run core unit tests
+        run: ./gradlew core:test -PmcVer=26.2.0 --stacktrace
+
+      - name: Build Fabric and NeoForge 26.2 jars
+        run: ./gradlew fabric:assemble neoforge:assemble -PmcVer=26.2.0 --stacktrace
+
+      - name: Collect jars and checksums
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          cp fabric/build/libs/DistantHorizons-fabric-"$VERSION"-26.2.jar \
+             neoforge/build/libs/DistantHorizons-neoforge-"$VERSION"-26.2.jar dist/
+          cd dist
+          sha256sum *.jar | tee SHA256SUMS.txt
+
+      - name: Write release notes
+        run: |
+          set -euo pipefail
+          BASE=$(git describe --tags --abbrev=0 --match '[0-9]*.[0-9]*.[0-9]*b' HEAD 2>/dev/null || echo unknown)
+          {
+            echo "Distant Horizons **$VERSION** — the Tellus fork, for Minecraft 26.2 (Fabric and NeoForge, Java 25)."
+            echo
+            echo "Official Distant Horizons \`$BASE\` plus the Tellus patch series (see PATCHES.md): true-height"
+            echo "(14-bit Y) LOD storage, tri-state generator availability, configurable world-gen pause speed,"
+            echo "coarse-parent retention, native-chunk readiness handoff (Sodium/Iris, 26.2 only) and coarse-first"
+            echo "generation priority."
+            echo
+            echo "**LOD databases written by this build are not readable by upstream Distant Horizons, and vice versa.**"
+            echo "The upstream auto-updater is disabled. Core submodule: TimStewartJ/distant-horizons-core@${CORE_SHA:0:9} (tag \`$TAG\`)."
+            echo
+            echo '```'
+            cat dist/SHA256SUMS.txt
+            echo '```'
+          } > notes.md
+
+      - name: Create or update the GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" dist/* --clobber
+            gh release edit "$TAG" --notes-file notes.md
+          else
+            gh release create "$TAG" dist/* --verify-tag --title "Distant Horizons $VERSION (Tellus fork)" --notes-file notes.md
+          fi
