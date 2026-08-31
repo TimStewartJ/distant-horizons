@@ -61,8 +61,14 @@ flattened branch is preserved in `TimStewartJ/Tellus` under the tags `archive/20
 ```powershell
 $env:JAVA_HOME = '<JDK 25>'
 .\gradlew.bat fabric:assemble '-PmcVer=26.2.0'      # fabric\build\libs\DistantHorizons-fabric-<version>-26.2.jar
+.\gradlew.bat neoforge:assemble '-PmcVer=26.2.0'    # neoforge\build\libs\DistantHorizons-neoforge-<version>-26.2.jar
 .\gradlew.bat core:test      '-PmcVer=26.2.0'      # core unit tests, including TellusReflectionContractTest
 ```
+
+CI (`.github/workflows/ci.yml`) runs the core tests and builds both 26.2 jars on every push.
+Releases (`.github/workflows/release.yml`) are cut by pushing a tag equal to `mod_version`
+(`3.2.0-b-tellus-fork.N`) to **both** repositories at the commit pair to release; the workflow
+verifies the pair, builds, and publishes the jars with SHA-256 sums as a GitHub Release.
 
 ## Moving to a new official release
 
