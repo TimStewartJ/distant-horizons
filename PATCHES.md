@@ -37,6 +37,7 @@ the names Tellus depends on.
 | P6 | Keep coarse LODs rendering until all children hold real data | TimStewartJ | `keepLowerDetailLodsUntilChildrenHaveData`: a parent section stays visible while its children have only empty buffers, removing the hole that `upsampleLowerDetailLodsToFillHoles` papers over with database writes. | **Yes** — generic fix for N-sized generation. |
 | P7 | Keep DH visible until native chunks are ready | TimStewartJ | Native-chunk readiness tracking (Sodium render sections), fade mask texture in the terrain shader, Iris shader-pack patching, `enableNativeChunkReadinessHandoff`. Falls back to normal clipping whenever a hook is unsupported. | Maybe, as a generic hook; the Sodium/Iris implementation is the fragile part. |
 | P8 | Prioritize coarse terrain and harden renderer state | TimStewartJ | `GENERATION_PRIORITY` / `getPriorityRetrievalPos` so a coarse first paint runs before normal requests; renderer state hardening. | Plausible with P2. Note: adds API members without bumping the API minor version. |
+| P9 | Keep coarse-first generation work-conserving | TimStewartJ | Bounds coarse priority to 75% while normal work exists, backs off retryable unavailable inputs without occupying workers, enforces the configured worker limit, and avoids regenerating complete priority ancestors. | **Yes** — generic scheduler fairness and retry behavior. |
 
 ### Wrapper (this repo)
 
