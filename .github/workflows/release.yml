@@ -1,6 +1,6 @@
 name: Release
 
-# Builds the Minecraft 26.2 Fabric and NeoForge jars from a version tag and publishes them as a
+# Builds the Minecraft 26.2 and 26.3 Fabric and NeoForge jars from a version tag and publishes them as a
 # GitHub Release. Trigger: push a tag equal to mod_version (e.g. 3.2.0-b-tellus-fork.2), or
 # dispatch manually for an existing tag. The same tag must exist on the core submodule commit.
 
@@ -65,24 +65,25 @@ jobs:
       - name: Run core unit tests
         run: ./gradlew core:test -PmcVer=26.2.0 --stacktrace
 
-      - name: Build Fabric and NeoForge 26.2 jars
-        run: ./gradlew fabric:assemble neoforge:assemble -PmcVer=26.2.0 --stacktrace
-
-      - name: Collect jars and checksums
+      - name: Build Fabric and NeoForge jars for Minecraft 26.2 and 26.3
         run: |
           set -euo pipefail
           mkdir -p dist
-          cp fabric/build/libs/DistantHorizons-fabric-"$VERSION"-26.2.jar \
-             neoforge/build/libs/DistantHorizons-neoforge-"$VERSION"-26.2.jar dist/
+          for MC in 26.2 26.3; do
+            ./gradlew fabric:assemble neoforge:assemble -PmcVer="$MC.0" --stacktrace
+            cp fabric/build/libs/DistantHorizons-fabric-"$VERSION"-"$MC".jar \
+               neoforge/build/libs/DistantHorizons-neoforge-"$VERSION"-"$MC".jar dist/
+          done
           cd dist
+          test "$(ls *.jar | wc -l)" -eq 4 || { echo "::error::expected 4 jars"; exit 1; }
           sha256sum *.jar | tee SHA256SUMS.txt
 
       - name: Write release notes
         run: |
           set -euo pipefail
-          BASE=$(git describe --tags --abbrev=0 --match '[0-9]*.[0-9]*.[0-9]*b' HEAD 2>/dev/null || echo unknown)
+          BASE=$(git describe --tags --abbrev=0 --match '[0-9]*.[0-9]*.[0-9]*' --exclude '*-tellus-*' HEAD 2>/dev/null || echo unknown)
           {
-            echo "Distant Horizons **$VERSION** — the Tellus fork, for Minecraft 26.2 (Fabric and NeoForge, Java 25)."
+            echo "Distant Horizons **$VERSION** — the Tellus fork, for Minecraft 26.2 and 26.3 (Fabric and NeoForge, Java 25)."
             echo
             echo "Official Distant Horizons \`$BASE\` plus the Tellus patch series (see PATCHES.md): true-height"
             echo "(14-bit Y) LOD storage, tri-state generator availability, configurable world-gen pause speed,"

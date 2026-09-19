@@ -1,6 +1,6 @@
 name: CI
 
-# Builds the Minecraft 26.2 Fabric and NeoForge jars of the Tellus fork and runs the core unit
+# Builds the Minecraft 26.2 and 26.3 Fabric and NeoForge jars of the Tellus fork and runs the core unit
 # tests (including TellusReflectionContractTest, which pins the names Tellus reaches by reflection).
 
 on:
@@ -40,16 +40,16 @@ jobs:
       - name: Run core unit tests
         run: ./gradlew core:test -PmcVer=26.2.0 --stacktrace
 
-      - name: Build Fabric and NeoForge 26.2 jars
-        run: ./gradlew fabric:assemble neoforge:assemble -PmcVer=26.2.0 --stacktrace
-
-      - name: Collect release-shaped jars
+      - name: Build Fabric and NeoForge jars for Minecraft 26.2 and 26.3
         run: |
           set -euo pipefail
           VERSION=$(sed -n 's/^mod_version=//p' gradle.properties | tr -d '\r')
           mkdir -p dist
-          cp fabric/build/libs/DistantHorizons-fabric-"$VERSION"-26.2.jar \
-             neoforge/build/libs/DistantHorizons-neoforge-"$VERSION"-26.2.jar dist/
+          for MC in 26.2 26.3; do
+            ./gradlew fabric:assemble neoforge:assemble -PmcVer="$MC.0" --stacktrace
+            cp fabric/build/libs/DistantHorizons-fabric-"$VERSION"-"$MC".jar \
+               neoforge/build/libs/DistantHorizons-neoforge-"$VERSION"-"$MC".jar dist/
+          done
           ls -l dist
 
       - name: Upload jars
