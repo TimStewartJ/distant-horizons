@@ -19,7 +19,7 @@
 
 package com.seibel.distanthorizons.fabric.mixins.mods.iris;
 
-#if MC_VER == MC_26_2_0
+#if MC_VER == MC_26_2_0 || MC_VER == MC_26_3_0
 
 import com.seibel.distanthorizons.core.logging.DhLogger;
 import com.seibel.distanthorizons.core.logging.DhLoggerBuilder;
@@ -79,6 +79,12 @@ public abstract class MixinIrisTransformPatcherNativeChunkReadiness
 
 #else
 
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Pseudo;
+
+/** Inactive on this Minecraft version: FabricMixinPlugin never applies it, but Mixin rejects a listed class without the annotation. */
+@Pseudo
+@Mixin(targets = "net.irisshaders.iris.pipeline.transform.TransformPatcher", remap = false)
 public abstract class MixinIrisTransformPatcherNativeChunkReadiness { }
 
 #endif

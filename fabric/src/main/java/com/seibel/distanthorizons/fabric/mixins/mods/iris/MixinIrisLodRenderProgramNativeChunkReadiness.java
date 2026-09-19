@@ -19,7 +19,7 @@
 
 package com.seibel.distanthorizons.fabric.mixins.mods.iris;
 
-#if MC_VER == MC_26_2_0
+#if MC_VER == MC_26_2_0 || MC_VER == MC_26_3_0
 
 import com.seibel.distanthorizons.common.render.openGl.terrain.GlNativeChunkReadinessTexture;
 import org.joml.Matrix4fc;
@@ -97,6 +97,12 @@ public abstract class MixinIrisLodRenderProgramNativeChunkReadiness
 
 #else
 
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Pseudo;
+
+/** Inactive on this Minecraft version: FabricMixinPlugin never applies it, but Mixin rejects a listed class without the annotation. */
+@Pseudo
+@Mixin(targets = "net.irisshaders.iris.compat.dh.IrisLodRenderProgram", remap = false)
 public abstract class MixinIrisLodRenderProgramNativeChunkReadiness { }
 
 #endif

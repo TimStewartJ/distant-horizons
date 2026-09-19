@@ -19,7 +19,7 @@
 
 package com.seibel.distanthorizons.fabric.mixins.mods.sodium;
 
-#if MC_VER == MC_26_2_0
+#if MC_VER == MC_26_2_0 || MC_VER == MC_26_3_0
 
 import com.seibel.distanthorizons.core.render.nativeReadiness.NativeChunkRenderReadinessTracker;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -77,6 +77,12 @@ public abstract class MixinSodiumRenderSectionManagerNativeChunkReadiness
 
 #else
 
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Pseudo;
+
+/** Inactive on this Minecraft version: FabricMixinPlugin never applies it, but Mixin rejects a listed class without the annotation. */
+@Pseudo
+@Mixin(targets = "net.caffeinemc.mods.sodium.client.render.chunk.RenderSectionManager", remap = false)
 public abstract class MixinSodiumRenderSectionManagerNativeChunkReadiness { }
 
 #endif
