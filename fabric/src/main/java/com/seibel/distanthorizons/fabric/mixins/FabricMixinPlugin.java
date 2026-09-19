@@ -25,7 +25,7 @@ public class FabricMixinPlugin extends AbstractDhMixinPlugin implements IMixinCo
 	{
 		if (mixinClassName.contains("NativeChunkReadiness"))
 		{
-			#if MC_VER != MC_26_2_0
+			#if MC_VER != MC_26_2_0 && MC_VER != MC_26_3_0
 			return false;
 			#endif
 		}

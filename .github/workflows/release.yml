@@ -74,6 +74,7 @@ jobs:
             cp fabric/build/libs/DistantHorizons-fabric-"$VERSION"-"$MC".jar \
                neoforge/build/libs/DistantHorizons-neoforge-"$VERSION"-"$MC".jar dist/
           done
+          python3 .github/scripts/check-mixin-annotations.py dist/*.jar
           cd dist
           test "$(ls *.jar | wc -l)" -eq 4 || { echo "::error::expected 4 jars"; exit 1; }
           sha256sum *.jar | tee SHA256SUMS.txt
@@ -87,7 +88,7 @@ jobs:
             echo
             echo "Official Distant Horizons \`$BASE\` plus the Tellus patch series (see PATCHES.md): true-height"
             echo "(14-bit Y) LOD storage, tri-state generator availability, configurable world-gen pause speed,"
-            echo "coarse-parent retention, native-chunk readiness handoff (Sodium/Iris, 26.2 only) and coarse-first"
+            echo "coarse-parent retention, native-chunk readiness handoff (Sodium/Iris on Fabric) and coarse-first"
             echo "generation priority."
             echo
             echo "**LOD databases written by this build are not readable by upstream Distant Horizons, and vice versa.**"

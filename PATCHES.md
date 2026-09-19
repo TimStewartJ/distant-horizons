@@ -10,7 +10,7 @@ commit the series is based on, and `main` is that base plus the patches.
 | Wrapper (this repo) | tag `3.3.1` = `f0cefb7a` (API 7.1.0) | `main` |
 | Core (`coreSubProjects`) | tag `3.3.1` = `b0a5f350` | `main` |
 
-Builds are versioned `<official mod_version>-tellus-fork.N` (currently `3.3.1-tellus-fork.5`) and
+Builds are versioned `<official mod_version>-tellus-fork.N` (currently `3.3.1-tellus-fork.6`) and
 tagged identically in both repositories. fork.1–fork.3 were built on tag `3.2.0b` and fork.4 on official
 `main` two days before 3.3.0 (`3.2.1-b-dev`); their tags keep that history. Base the fork on a release tag:
 a version containing `dev` sets `ModInfo.IS_DEV_BUILD`, which turns on per-datapoint validation, leak
@@ -49,7 +49,7 @@ the names Tellus depends on.
 | --- | --- | --- |
 | Tellus distribution: version tellus-height.1 and ignore local artifacts | Yucareux | Version and `.gitignore` from the original flattened fork. |
 | Point the core submodule at the Tellus core fork | TimStewartJ | `.gitmodules` → `TimStewartJ/distant-horizons-core`. |
-| P5–P8 wrapper halves | TimStewartJ | Fabric mixins into Sodium (`RenderSectionManager`, `RenderSection`) and Iris (`IrisLodRenderProgram`, `IrisRenderingPipeline`, `TransformPatcher`), all `require = 0` and gated to MC 26.2 and to the loaded mod in `FabricMixinPlugin` (3.2.1 removed that plugin's loaded-mod check); `GlNativeChunkReadinessTexture`; `SodiumAccessor`; version bumps. |
+| P5–P8 wrapper halves | TimStewartJ | Fabric mixins into Sodium (`RenderSectionManager`, `RenderSection`) and Iris (`IrisLodRenderProgram`, `IrisRenderingPipeline`, `TransformPatcher`), all `require = 0` and gated to MC 26.2 and 26.3 and to the loaded mod in `FabricMixinPlugin` (3.2.1 removed that plugin's loaded-mod check); `GlNativeChunkReadinessTexture`; `SodiumAccessor`; version bumps. |
 | Release 3.2.0-b-tellus-fork.2 from the proper fork layout | TimStewartJ | First build from these repositories; byte-identical to `fork.1` except the version strings. |
 | CI / Release workflows, PATCHES.md, fork.3 and fork.4 releases | TimStewartJ | Tag-driven builds and this document; version bumps. |
 | Refuse Iris older than 1.11.4 on Minecraft 26.2 | TimStewartJ | Official 26.2 properties allow Iris 1.11.2, which lacks `IrisApi.isReverseZDuringShaders` and crashes on the first frame with a shader pack. |
@@ -72,8 +72,9 @@ $env:JAVA_HOME = '<JDK 25>'
 .\gradlew.bat core:test      '-PmcVer=26.2.0'      # core unit tests, including TellusReflectionContractTest
 ```
 
-Minecraft 26.3 jars build the same way with `'-PmcVer=26.3.0'`. The native-chunk readiness mixins (P7) stay
-limited to 26.2 until their Sodium and Iris targets are re-checked in a 26.3 game.
+Minecraft 26.3 jars build the same way with `'-PmcVer=26.3.0'`. The native-chunk readiness mixins (P7) are active on
+Fabric 26.2 and 26.3. On any other version they compile to empty stubs, which must keep their `@Mixin` annotation:
+the mixin config lists them for every version, and Mixin refuses to start when a listed class has none.
 
 CI (`.github/workflows/ci.yml`) runs the core tests and builds the 26.2 and 26.3 jars on every push.
 Releases (`.github/workflows/release.yml`) are cut by pushing a tag equal to `mod_version`
@@ -116,3 +117,11 @@ applies `SURFACE_ONLY` at runtime while its direct LOD generator is registered.
 Rebase 2026-09-18 (`fork.5`, from official `main` `1ef1d458` / `d354abe8` to tag `3.3.1`): official 3.3.0 is that
 base plus a version-string change, and 3.3.1 only rolls the shadow Gradle plugin back to 9.0.0, so the series
 applied without changes. fork.5 is the first release that also publishes Minecraft 26.3 jars.
+
+fork.6 (2026-09-19): the fork.5 Fabric 26.3 jar crashed at startup (`MixinSodiumRenderSectionNativeChunkReadiness
+is missing an @Mixin annotation`), because the readiness mixins were empty, unannotated classes outside 26.2.
+The stubs are now annotated, and the mixins are enabled on 26.3: their targets in Sodium 0.9.2+mc26.3 and
+Iris 1.11.6+mc26.3 match the 26.2 builds (`TransformPatcher.patchDHTerrain` gained a parameter the hook does not
+read). Checked in a 26.3 game with Tellus: handoff active through the default shader and through an Iris shader
+pack, Tellus LOD generation in single-player and on a dedicated server, clean close. The 26.2 jars are unchanged
+apart from the version.
