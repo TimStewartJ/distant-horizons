@@ -2,18 +2,19 @@
 
 This repository (and its `coreSubProjects` submodule, `TimStewartJ/distant-horizons-core`) is a
 fork of the official Distant Horizons mod, maintained as a **small patch series on top of official
-Distant Horizons**. Both repositories keep the official history: `upstream-base` mirrors the official
-`main`, and `main` is the official base below plus the patches.
+Distant Horizons**. Both repositories keep the official history: `upstream-base` points at the official
+commit the series is based on, and `main` is that base plus the patches.
 
 | | Official base | Fork branch |
 | --- | --- | --- |
-| Wrapper (this repo) | official `main` `1ef1d458` (`3.2.1-b-dev`, API 7.1.0) | `main` |
-| Core (`coreSubProjects`) | official `main` `d354abe8` (the core pinned by that wrapper commit) | `main` |
+| Wrapper (this repo) | tag `3.3.1` = `f0cefb7a` (API 7.1.0) | `main` |
+| Core (`coreSubProjects`) | tag `3.3.1` = `b0a5f350` | `main` |
 
-Builds are versioned `<official mod_version>-tellus-fork.N` (currently `3.2.1-b-dev-tellus-fork.4`) and
-tagged identically in both repositories. fork.1–fork.3 were built on tag `3.2.0b`; their tags keep that
-history. The base moved to official `main` because Iris for Minecraft 26.3 refuses Distant Horizons `<=3.2.0`
-and official Distant Horizons has no 3.2.1 release yet.
+Builds are versioned `<official mod_version>-tellus-fork.N` (currently `3.3.1-tellus-fork.5`) and
+tagged identically in both repositories. fork.1–fork.3 were built on tag `3.2.0b` and fork.4 on official
+`main` two days before 3.3.0 (`3.2.1-b-dev`); their tags keep that history. Base the fork on a release tag:
+a version containing `dev` sets `ModInfo.IS_DEV_BUILD`, which turns on per-datapoint validation, leak
+tracking and the nightly-build chat warning.
 The upstream auto-updater is disabled in this build (see P3).
 
 Why a fork exists at all: Tellus renders true-height Earth (Everest at 1:1 is ~8,849 m), which
@@ -71,7 +72,10 @@ $env:JAVA_HOME = '<JDK 25>'
 .\gradlew.bat core:test      '-PmcVer=26.2.0'      # core unit tests, including TellusReflectionContractTest
 ```
 
-CI (`.github/workflows/ci.yml`) runs the core tests and builds both 26.2 jars on every push.
+Minecraft 26.3 jars build the same way with `'-PmcVer=26.3.0'`. The native-chunk readiness mixins (P7) stay
+limited to 26.2 until their Sodium and Iris targets are re-checked in a 26.3 game.
+
+CI (`.github/workflows/ci.yml`) runs the core tests and builds the 26.2 and 26.3 jars on every push.
 Releases (`.github/workflows/release.yml`) are cut by pushing a tag equal to `mod_version`
 (`…-tellus-fork.N`) to **both** repositories at the commit pair to release; the workflow
 verifies the pair, builds, and publishes the jars with SHA-256 sums as a GitHub Release.
@@ -108,3 +112,7 @@ and the database grew from 201 MB to 726 MB (7.7k to 268k rows). With propagatio
 repeats and no growth, but still rebuilt 81 complete block-detail sections because their columns are `SURFACE`.
 With propagation off and `generatorPlan = SURFACE_ONLY` it ran only the 281 genuinely missing tasks. Tellus 0.8.4-fork.12
 applies `SURFACE_ONLY` at runtime while its direct LOD generator is registered.
+
+Rebase 2026-09-18 (`fork.5`, from official `main` `1ef1d458` / `d354abe8` to tag `3.3.1`): official 3.3.0 is that
+base plus a version-string change, and 3.3.1 only rolls the shadow Gradle plugin back to 9.0.0, so the series
+applied without changes. fork.5 is the first release that also publishes Minecraft 26.3 jars.
