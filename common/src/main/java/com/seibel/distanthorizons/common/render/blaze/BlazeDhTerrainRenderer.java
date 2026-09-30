@@ -347,6 +347,8 @@ public class BlazeDhTerrainRenderer implements IDhTerrainRenderer
 									(float) (bufferContainer.minCornerBlockPos.getZ() - camPos.z));
 								BEFORE_BUFFER_RENDER_EVENT_PARAM.update(renderEventParam, MODEL_POS);
 								ApiEventInjector.INSTANCE.fireAllEvents(DhApiBeforeBufferRenderEvent.class, BEFORE_BUFFER_RENDER_EVENT_PARAM);
+								// clear the level so it can be garbage collected once the world closes
+								BEFORE_BUFFER_RENDER_EVENT_PARAM.clientLevelWrapper = null;
 							}
 							
 							renderPassWrapper.setIndexBuffer(bufferWrapper.getIndexGpuBuffer());

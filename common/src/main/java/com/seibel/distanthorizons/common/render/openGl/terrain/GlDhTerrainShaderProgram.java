@@ -414,6 +414,8 @@ public class GlDhTerrainShaderProgram extends GlShaderProgram implements IDhApiS
 					GlDhMetaRenderer.INSTANCE.shaderProgramForThisFrame.setModelOffsetPos(MODEL_POS);
 					
 					ApiEventInjector.INSTANCE.fireAllEvents(DhApiBeforeBufferRenderEvent.class, BEFORE_BUFFER_RENDER_EVENT_PARAM);
+					// clear the level so it can be garbage collected once the world closes
+					BEFORE_BUFFER_RENDER_EVENT_PARAM.clientLevelWrapper = null;
 				}
 				
 				IVertexBufferWrapper[] vertexBuffers = (opaquePass ? bufferContainer.vboOpaqueWrappers : bufferContainer.vboTransparentWrappers);
