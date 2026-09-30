@@ -54,6 +54,16 @@ the names Tellus depends on.
 | CI / Release workflows, PATCHES.md, fork.3 and fork.4 releases | TimStewartJ | Tag-driven builds and this document; version bumps. |
 | Refuse Iris older than 1.11.4 on Minecraft 26.2 | TimStewartJ | Official 26.2 properties allow Iris 1.11.2, which lacks `IrisApi.isReverseZDuringShaders` and crashes on the first frame with a shader pack. |
 
+## Upstream submissions
+
+Generic fixes are prepared on fresh upstream `main` in a separate clone (`E:\dh-upstream`) and tracked in the
+knowledge-base page `distant-horizons/upstreaming-roadmap`.
+
+| Date | Upstream | What | Origin in this fork | Status |
+| --- | --- | --- | --- | --- |
+| 2026-09-30 | core [!111](https://gitlab.com/distant-horizons-team/distant-horizons-core/-/merge_requests/111) | Free the world gen slot of tasks that fail (a failed or throwing task kept its slot, so a level stopped generating after `threads + 1` failures) | Found in P2's `WorldGenerationQueue` changes | Open |
+| — | — | L1 `StepTerrain` biome manager | `slipway-leak-fix` | Dropped: fixed upstream in `41be6fcac` |
+
 ## Provenance
 
 The series was extracted from `Yucareux/Tellus` branch `DH-Fork-Tellus`, whose "DH fork v1" commit
