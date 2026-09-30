@@ -144,7 +144,8 @@ public class FabricClientProxy implements AbstractModInitializer.IEventProxy
 		AttackBlockCallback.EVENT.register((player, level, interactionHand, blockPos, direction) ->
 		{
 			// if we have access to the server, use the chunk save event instead 
-			if (MC.clientConnectedToDedicatedServer())
+			// (also fired for the server side, which can be a dedicated server if it's running in the same process)
+			if (MC.clientConnectedToDedicatedServer() && level.isClientSide())
 			{
 				IClientLevelWrapper wrappedLevel = ClientLevelWrapper.getWrapper((ClientLevel) level);
 				
@@ -181,7 +182,8 @@ public class FabricClientProxy implements AbstractModInitializer.IEventProxy
 		UseBlockCallback.EVENT.register((player, level, hand, hitResult) -> 
 		{
 			// if we have access to the server, use the chunk save event instead 
-			if (MC.clientConnectedToDedicatedServer())
+			// (also fired for the server side, which can be a dedicated server if it's running in the same process)
+			if (MC.clientConnectedToDedicatedServer() && level.isClientSide())
 			{
 				if (hitResult.getType() == HitResult.Type.BLOCK
 						&& !hitResult.isInside())
