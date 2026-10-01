@@ -3,6 +3,7 @@ name: Release
 # Builds the Minecraft 26.2 and 26.3 Fabric and NeoForge jars from a version tag and publishes them as a
 # GitHub Release. Trigger: push a tag equal to mod_version (e.g. 3.2.0-b-tellus-fork.2), or
 # dispatch manually for an existing tag. The same tag must exist on the core submodule commit.
+# An optional .github/release-notes/<mod_version>.md is inserted into the release notes.
 
 on:
   push:
@@ -82,7 +83,8 @@ jobs:
       - name: Write release notes
         run: |
           set -euo pipefail
-          BASE=$(git describe --tags --abbrev=0 --match '[0-9]*.[0-9]*.[0-9]*' --exclude '*-tellus-*' HEAD 2>/dev/null || echo unknown)
+          # mod_version is <official mod_version>-tellus-fork.N, so the official base is the part before that suffix.
+          BASE="${VERSION%-tellus-fork.*}"
           {
             echo "Distant Horizons **$VERSION** — the Tellus fork, for Minecraft 26.2 and 26.3 (Fabric and NeoForge, Java 25)."
             echo
@@ -91,6 +93,11 @@ jobs:
             echo "coarse-parent retention, native-chunk readiness handoff (Sodium/Iris on Fabric) and coarse-first"
             echo "generation priority."
             echo
+            # What changed in this release, when the release ships a notes file.
+            if [ -f ".github/release-notes/$VERSION.md" ]; then
+              cat ".github/release-notes/$VERSION.md"
+              echo
+            fi
             echo "**LOD databases written by this build are not readable by upstream Distant Horizons, and vice versa.**"
             echo "The upstream auto-updater is disabled. Core submodule: TimStewartJ/distant-horizons-core@${CORE_SHA:0:9} (tag \`$TAG\`)."
             echo
