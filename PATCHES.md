@@ -66,7 +66,7 @@ the commits prepared on official `main` for upstream merge requests (see "Upstre
 | B | Unbind a level's world generators when it closes | core | `WorldGeneratorInjector` kept every loaded level's generator and so every closed world; concurrent binds could throw in `bind()`. | Prepared |
 | C | Clear the last frame's level references when the world closes | core | Static `ClientApi.RENDER_STATE`/`RENDER_PARAMS` kept the last rendered levels. | Prepared |
 | E | Shut down the world gen progress updater thread when a level closes | core | One idle thread per closed level. | Prepared |
-| A | Free the world gen slot of tasks that fail | core | Chunk conversion that throws never completed its task, so its generation slot stayed taken. Upstream's change also frees the slot of failed tasks; P9 already does that here, so only the conversion half applies. | core !111 (open) |
+| A | Free the world gen slot of tasks that fail | core | Chunk conversion that throws never completed its task, so its generation slot stayed taken. Upstream's change also frees the slot of failed tasks; P9 already does that here, so only the conversion half applies. | core !111 (merged 2026-10-04); drop on the next rebase past `825597fd` |
 | I2 | Re-decide the LOD render pass after DhApiBeforeRenderEvent | core | Iris sets its defer-transparent flag in that event, but the pass was chosen before it, so the first frame after every Iris pipeline creation ran a combined pass ("Unexpected; somehow the Opaque + Translucent pass ran with shaders on"). Official 3.3.4 still logs this once per pipeline. | Not submitted |
 | D | Don't keep the last world gen params in a static field | wrapper | `ThreadWorldGenParams.previousGlobalWorldGenParams` kept the last level. | Prepared |
 | F | Don't keep the last client level in the static render event params | wrapper | Static render event params kept the last `ClientLevelWrapper`. | Prepared |
@@ -83,7 +83,7 @@ knowledge-base page `distant-horizons/upstreaming-roadmap`.
 
 | Date | Upstream | What | Origin in this fork | Status |
 | --- | --- | --- | --- | --- |
-| 2026-09-30 | core [!111](https://gitlab.com/distant-horizons-team/distant-horizons-core/-/merge_requests/111) | Free the world gen slot of tasks that fail (a failed or throwing task kept its slot, so a level stopped generating after `threads + 1` failures) | Found in P2's `WorldGenerationQueue` changes | Open |
+| 2026-09-30 | core [!111](https://gitlab.com/distant-horizons-team/distant-horizons-core/-/merge_requests/111) | Free the world gen slot of tasks that fail (a failed or throwing task kept its slot, so a level stopped generating after `threads + 1` failures) | Found in P2's `WorldGenerationQueue` changes | Merged 2026-10-04 (`825597fd`, unchanged) |
 | — | — | L1 `StepTerrain` biome manager | `slipway-leak-fix` | Dropped: fixed upstream in `41be6fcac` |
 
 ## Provenance
