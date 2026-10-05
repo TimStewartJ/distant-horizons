@@ -63,7 +63,7 @@ the commits prepared on official `main` for upstream merge requests (see "Upstre
 
 | # | Commit subject | Repo | What it fixes | Upstream |
 | --- | --- | --- | --- | --- |
-| B | Unbind a level's world generators when it closes | core | `WorldGeneratorInjector` kept every loaded level's generator and so every closed world; concurrent binds could throw in `bind()`. | core !113 (open) |
+| B | Unbind a level's world generators when it closes | core | `WorldGeneratorInjector` kept every loaded level's generator and so every closed world; concurrent binds could throw in `bind()`. | core !113 (applied upstream as `dceafa45`); drop on the next rebase past it |
 | C | Clear the last frame's level references when the world closes | core | Static `ClientApi.RENDER_STATE`/`RENDER_PARAMS` kept the last rendered levels. | Prepared |
 | E | Shut down the world gen progress updater thread when a level closes | core | One idle thread per closed level. | Prepared |
 | A | Free the world gen slot of tasks that fail | core | Chunk conversion that throws never completed its task, so its generation slot stayed taken. Upstream's change also frees the slot of failed tasks; P9 already does that here, so only the conversion half applies. | core !111 (merged 2026-10-04); drop on the next rebase past `825597fd` |
@@ -84,8 +84,8 @@ knowledge-base page `distant-horizons/upstreaming-roadmap`.
 | Date | Upstream | What | Origin in this fork | Status |
 | --- | --- | --- | --- | --- |
 | 2026-09-30 | core [!111](https://gitlab.com/distant-horizons-team/distant-horizons-core/-/merge_requests/111) | Free the world gen slot of tasks that fail (a failed or throwing task kept its slot, so a level stopped generating after `threads + 1` failures) | Found in P2's `WorldGenerationQueue` changes | Merged 2026-10-04 (`825597fd`, unchanged) |
-| 2026-10-04 | wrapper issue [#1332](https://gitlab.com/distant-horizons-team/distant-horizons/-/work_items/1332) | Closed singleplayer worlds stay in memory (all leak causes, harness evidence) | Leak fixes B–G | Open |
-| 2026-10-04 | core [!113](https://gitlab.com/distant-horizons-team/distant-horizons-core/-/merge_requests/113) | B: Unbind a level's world generators when it closes (+ ConcurrentHashMap, 2 unit tests) | Leak fix B | Open |
+| 2026-10-04 | wrapper issue [#1332](https://gitlab.com/distant-horizons-team/distant-horizons/-/work_items/1332) | Closed singleplayer worlds stay in memory (all leak causes, harness evidence) | Leak fixes B–G | Closed 2026-10-04 by the maintainer after applying B ("Fixed as of 1d50e513 and manual merge !113") |
+| 2026-10-04 | core [!113](https://gitlab.com/distant-horizons-team/distant-horizons-core/-/merge_requests/113) | B: Unbind a level's world generators when it closes (+ ConcurrentHashMap, 2 unit tests) | Leak fix B | Applied by hand 2026-10-04 (`dceafa45`, plus `WorldGeneratorInjector.clear()` on world close) |
 | — | — | L1 `StepTerrain` biome manager | `slipway-leak-fix` | Dropped: fixed upstream in `41be6fcac` |
 
 ## Provenance
