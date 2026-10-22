@@ -59,18 +59,18 @@ the names Tellus depends on.
 
 Generic fixes from the Slipway world-retention (leak) investigation and its shader-artifact investigation. A–G are
 the commits prepared on official `main` for upstream merge requests (see "Upstream submissions"), cherry-picked with
-`-x`; each one leaves the fork at the first rebase onto an official release that contains it.
+`-x`; each one leaves the fork at the first rebase onto an official release that contains it (G stays: fork-only).
 
 | # | Commit subject | Repo | What it fixes | Upstream |
 | --- | --- | --- | --- | --- |
 | B | Unbind a level's world generators when it closes | core | `WorldGeneratorInjector` kept every loaded level's generator and so every closed world; concurrent binds could throw in `bind()`. | core !113 (applied upstream as `dceafa45`); drop on the next rebase past it |
-| C | Clear the last frame's level references when the world closes | core | Static `ClientApi.RENDER_STATE`/`RENDER_PARAMS` kept the last rendered levels. | Prepared |
-| E | Shut down the world gen progress updater thread when a level closes | core | One idle thread per closed level. | Prepared |
+| C | Clear the last frame's level references when the world closes | core | Static `ClientApi.RENDER_STATE`/`RENDER_PARAMS` kept the last rendered levels. | Prepared with E as one core MR (`fix/release-closed-world`), not yet opened |
+| E | Shut down the world gen progress updater thread when a level closes | core | One idle thread per closed level. | Prepared with C as one core MR (`fix/release-closed-world`), not yet opened |
 | A | Free the world gen slot of tasks that fail | core | Chunk conversion that throws never completed its task, so its generation slot stayed taken. Upstream's change also frees the slot of failed tasks; P9 already does that here, so only the conversion half applies. | core !111 (merged 2026-10-04); drop on the next rebase past `825597fd` |
-| I2 | Re-decide the LOD render pass after DhApiBeforeRenderEvent | core | Iris sets its defer-transparent flag in that event, but the pass was chosen before it, so the first frame after every Iris pipeline creation ran a combined pass ("Unexpected; somehow the Opaque + Translucent pass ran with shaders on"). Official 3.3.4 still logs this once per pipeline. | Not submitted |
-| D | Don't keep the last world gen params in a static field | wrapper | `ThreadWorldGenParams.previousGlobalWorldGenParams` kept the last level. | Prepared |
-| F | Don't keep the last client level in the static render event params | wrapper | Static render event params kept the last `ClientLevelWrapper`. | Prepared |
-| G | Only handle client-side block events in FabricClientProxy | wrapper | With a server in the same process, block callbacks cast a `ServerLevel` to `ClientLevel` and threw. | Prepared |
+| I2 | Re-decide the LOD render pass after DhApiBeforeRenderEvent | core | Iris sets its defer-transparent flag in that event, but the pass was chosen before it, so the first frame after every Iris pipeline creation ran a combined pass ("Unexpected; somehow the Opaque + Translucent pass ran with shaders on"). Official 3.3.4 still logs this once per pipeline. | Not submitted; candidate (still unfixed on upstream main 2026-10-22) |
+| D | Don't keep the last world gen params in a static field | wrapper | `ThreadWorldGenParams.previousGlobalWorldGenParams` kept the last level. | Prepared with F as one wrapper MR (`fix/release-closed-world`), not yet opened |
+| F | Don't keep the last client level in the static render event params | wrapper | Static render event params kept the last `ClientLevelWrapper`. | Prepared with D as one wrapper MR (`fix/release-closed-world`), not yet opened |
+| G | Only handle client-side block events in FabricClientProxy | wrapper | With a server in the same process, block callbacks cast a `ServerLevel` to `ClientLevel` and threw. | Fork-only (decided 2026-10-22): not a leak, and only hits a dedicated server running inside the client process (test setups) |
 
 Measured with the DH-only leak harness (knowledge-base page `distant-horizons/upstreaming-roadmap`): after five worlds
 opened and closed, official `main` (3.3.5-dev) kept all five in memory and gained DH threads with each world; with the
